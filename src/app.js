@@ -147,11 +147,12 @@ app.post("/customers", async (req, res) => {
     }
 
     try {
+        const formatedBirthday = birthday.slice(0, 10);
         const customer = await db.query('SELECT * FROM customers WHERE cpf = $1;', [cpf])
         if (customer.rows.length > 0) {
             res.status(409).send("Cliente de mesmo cpf já existe!")
         } else {
-            await db.query('INSERT INTO customers(name, phone, cpf, birthday) values ($1, $2, $3, $4);', [name, phone, cpf, birthday]);
+            await db.query('INSERT INTO customers(name, phone, cpf, birthday) values ($1, $2, $3, $4);', [name, phone, cpf, formatedBirthday]);
             res.status(201).send("Cliente criado!")
         }
     } catch (err) {
@@ -161,7 +162,7 @@ app.post("/customers", async (req, res) => {
 
 })
 
-app.put("/customers:id", async (req, res) => {
+app.put("/customers/:id", async (req, res) => {
 
     const { id } = req.params
     const { name, phone, cpf, birthday } = req.body
@@ -175,7 +176,7 @@ app.put("/customers:id", async (req, res) => {
 
 
 
-    const validation = createCustomer.validate({ name, phone, cpf, birthday }, { abortEarly: "False" })
+    const validation = createCustomer.validate({ phone, cpf, birthday }, { abortEarly: "False" })
     if (validation.error) {
         console.log("erro 1 - customers update")
         const errors = validation.error.details.map((detail) => detail.message)
@@ -198,7 +199,7 @@ app.put("/customers:id", async (req, res) => {
             res.status(409).send("Cliente de mesmo cpf já existe!")
         } else {
             await db.query('UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5;', [name, phone, cpf, birthday, id]);
-            res.status(201).send("Cliente alterado!")
+            res.status(200).send("Cliente alterado!")
         }
     } catch (err) {
         res.status(500).send(err.message)
