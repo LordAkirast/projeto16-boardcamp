@@ -130,7 +130,7 @@ app.post("/customers", async (req, res) => {
 
     let phoneValidation = phone.toString();
     let cpfValidation = cpf.toString();
-    console.log(typeof(phoneValidation))
+    let birthdayValidation = birthday.toString();
 
     if (!name) {
         return res.status(400).send('Nome precisa ser preenchido!')
@@ -146,6 +146,10 @@ app.post("/customers", async (req, res) => {
 
     if (!name) {
         return res.status(400).send("name precisa ser preenchido!")
+    }
+
+    if (birthdayValidation.length !== 10) {
+        return res.status(400).send(`birthday deve ter 10 caracteres contando com hifen. Ex: 1995-05-12. Atualmente ele tem: ${birthdayValidation.length}`)
     }
 
     try {
@@ -188,6 +192,8 @@ app.put("/customers/:id", async (req, res) => {
     }
 
     let phoneValidation = phone.toString();
+    let cpfValidation = cpf.toString();
+    let birthdayValidation = birthday.toString();
 
     if (phoneValidation.length < 10 || phoneValidation > 11) {
         return res.status(400).send(`Erro ao tentar atualizar dados: Phone deve ter 10 ou 11 caracteres. Atualmente ele tem: ${phoneValidation.length}`)
@@ -195,6 +201,14 @@ app.put("/customers/:id", async (req, res) => {
 
     if (!name) {
         return res.status(400).send("Erro ao tentar atualizar dados: name precisa ser preenchido!")
+    }
+
+    if (cpfValidation.length !== 11) {
+        return res.status(400).send(`CPF deve ter 11 caracteres. Atualmente ele tem: ${cpfValidation.length}`)
+    }
+
+    if (birthdayValidation.length !== 10) {
+        return res.status(400).send(`birthday deve ter 10 caracteres contando com hifen. Ex: 1995-05-12. Atualmente ele tem: ${birthdayValidation.length}`)
     }
 
     try {
@@ -212,6 +226,81 @@ app.put("/customers/:id", async (req, res) => {
 
 })
 
+app.get("/rentals", async (req, res) => {
+
+    try {
+        const alugueis = await db.query(`SELECT * FROM rentals;`)
+        res.send(alugueis.rows)
+    } catch (err) {
+        res.status(500).send(err.message)
+
+    }
+
+})
+
+app.post("/rentals", async (req, res) => {
+
+    let { customerId, gameId, daysRented } = req.body
+
+    
+
+    try {
+        const jogos = await db.query(`SELECT * FROM games where id = $1`, [gameId])
+        if (jogos.rows.length <= 0) {
+            res.status(404).send("Jogo não encontrado!")
+        } else {
+            let pricePerDay = jogos.rows[0].pricePerDay
+            console.log('jogo encontrado com sucesso')
+
+
+
+            daysRented = Date.now()
+            let originalPrice = daysRented * pricePerDay
+
+
+            const rentData = {
+                customerId: 1,
+                gameId: 1,
+                daysRented: 3
+            }
+
+
+            const validation = createGame.validate({ stockTotal, pricePerDay }, { abortEarly: "False" })
+            if (validation.error) {
+                console.log("erro 1")
+                const errors = validation.error.details.map((detail) => detail.message)
+                return res.status(422).send(errors);
+            }
+
+            if (stockTotal <= 0 || pricePerDay <= 0) {
+                return res.status(400).send("stockTotal e/ou pricePerDay devem ser maiores do que 0.")
+            }
+
+            if (!name) {
+                return res.status(400).send("name precisa ser preenchido!")
+            }
+
+            try {
+                const jogos = await db.query('SELECT * FROM games WHERE name = $1;', [name]);
+                if (jogos.rows.length > 0) {
+                    res.status(409).send("Jogo de mesmo nome já existe!")
+                } else {
+                    await db.query(
+                        'INSERT INTO games (name, image, "stockTotal", "pricePerDay") VALUES ($1, $2, $3, $4);',
+                        [name, image, stockTotal, pricePerDay]
+                    ); res.status(201).send("Jogo inserido!")
+                }
+            } catch (err) {
+                res.status(500).send(err.message)
+
+            }
+        }
+    } catch (err) {
+        res.status(500).send(err.message)
+
+    }
+
+})
 
 
 app.listen(5000, () => console.log("Servidor ligado!"))
