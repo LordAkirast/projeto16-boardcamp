@@ -4,6 +4,8 @@ import { db } from "./databases/database.connection.js"
 import Joi from "joi"
 
 
+
+
 const app = express()
 app.use(cors())
 app.use(express.json())
@@ -17,7 +19,7 @@ const createGame = Joi.object({
 const createCustomer = Joi.object({
     phone: Joi.number().required(),
     cpf: Joi.number().required(),
-    birthday: Joi.date().format(['YYYY/MM/DD']).required()
+    birthday: Joi.date().iso().required()
 });
 
 
