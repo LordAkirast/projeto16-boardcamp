@@ -15,7 +15,6 @@ const createGame = Joi.object({
 });
 
 const createCustomer = Joi.object({
-    name: Joi.string().required(),
     phone: Joi.number().required(),
     cpf: Joi.number().required(),
     birthday: Joi.date().required()
@@ -90,7 +89,7 @@ app.get("/customers", async (req, res) => {
 
 })
 
-app.get("/customers:id", async (req, res) => {
+app.get("/customers/:id", async (req, res) => {
     const { id } = req.params
 
 
@@ -121,7 +120,7 @@ app.post("/customers", async (req, res) => {
 
 
 
-    const validation = createCustomer.validate({ name, phone, cpf, birthday }, { abortEarly: "False" })
+    const validation = createCustomer.validate({ phone, cpf, birthday }, { abortEarly: "False" })
     if (validation.error) {
         console.log("erro 1 - customers")
         const errors = validation.error.details.map((detail) => detail.message)
@@ -130,6 +129,10 @@ app.post("/customers", async (req, res) => {
 
     let phoneValidation = phone.toString();
     let cpfValidation = cpf.toString();
+
+    if (!name) {
+        return res.status(400).send('Nome precisa ser preenchido!')
+    }
 
     if (phoneValidation.length < 10 || phoneValidation.length > 11) {
         return res.status(400).send(`Phone deve ter 10 ou 11 caracteres. Atualmente ele tem: ${phoneValidation.length}`)
