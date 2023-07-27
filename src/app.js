@@ -10,7 +10,6 @@ app.use(express.json())
 
 
 const createGame = Joi.object({
-    name: Joi.string().required(),
     stockTotal: Joi.number().required(),
     pricePerDay: Joi.number().required(),
 });
