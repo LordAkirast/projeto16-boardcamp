@@ -18,7 +18,7 @@ const createGame = Joi.object({
 const createCustomer = Joi.object({
     name: Joi.string().required(),
     phone: Joi.number().required(),
-    cpf: Joi.number().length(11).required(),
+    cpf: Joi.number().required(),
     birthday: Joi.date().required()
 });
 
@@ -130,9 +130,14 @@ app.post("/customers", async (req, res) => {
     }
 
     let phoneValidation = phone.toString();
+    let cpfValidation = cpf.toString();
 
-    if (phoneValidation.length < 10 || phoneValidation > 11) {
+    if (phoneValidation.length < 10 || phoneValidation.length > 11) {
         return res.status(400).send(`Phone deve ter 10 ou 11 caracteres. Atualmente ele tem: ${phoneValidation.length}`)
+    }
+
+    if (cpfValidation.length < 11) {
+        return res.status(400).send(`CPF deve ter 11 caracteres. Atualmente ele tem: ${cpfValidation.length}`)
     }
 
     if (!name) {
