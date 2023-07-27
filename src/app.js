@@ -17,7 +17,7 @@ const createGame = Joi.object({
 });
 
 const createCustomer = Joi.object({
-    phone: Joi.number().required(),
+    phone: Joi.string().required(),
     cpf: Joi.number().required(),
     birthday: Joi.date().iso().required()
 });
@@ -121,16 +121,16 @@ app.post("/customers", async (req, res) => {
     }
 
 
-
     const validation = createCustomer.validate({ phone, cpf, birthday }, { abortEarly: "False" })
     if (validation.error) {
-        console.log("erro 1 - customers")
+        console.log("erro 1 - customersaaa")
         const errors = validation.error.details.map((detail) => detail.message)
         return res.status(400).send(errors);
     }
 
     let phoneValidation = phone.toString();
     let cpfValidation = cpf.toString();
+    console.log(typeof(phoneValidation))
 
     if (!name) {
         return res.status(400).send('Nome precisa ser preenchido!')
