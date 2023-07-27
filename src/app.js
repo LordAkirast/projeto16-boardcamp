@@ -150,6 +150,8 @@ app.post("/customers", async (req, res) => {
 
     try {
         const formatedBirthday = birthday.slice(0, 10);
+        console.log(birthday)
+        console.log(formatedBirthday)
         const customer = await db.query('SELECT * FROM customers WHERE cpf = $1;', [cpf])
         if (customer.rows.length > 0) {
             res.status(409).send("Cliente de mesmo cpf já existe!")
