@@ -124,7 +124,7 @@ app.post("/customers", async (req, res) => {
     if (validation.error) {
         console.log("erro 1 - customers")
         const errors = validation.error.details.map((detail) => detail.message)
-        return res.status(422).send(errors);
+        return res.status(400).send(errors);
     }
 
     let phoneValidation = phone.toString();
