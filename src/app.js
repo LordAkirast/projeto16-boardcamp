@@ -17,7 +17,7 @@ const createGame = Joi.object({
 const createCustomer = Joi.object({
     phone: Joi.number().required(),
     cpf: Joi.number().required(),
-    birthday: Joi.date().format('DD-MM-YYYY').required()
+    birthday: Joi.date().required()
 });
 
 
