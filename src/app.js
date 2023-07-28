@@ -82,7 +82,7 @@ app.post("/games", async (req, res) => {
 app.get("/customers", async (req, res) => {
 
     try {
-        const clientes = await db.query(`SELECT * FROM customers;`)
+        const clientes = await db.query(`SELECT id, name, phone, cpf, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday FROM customers;`)
         res.send(clientes.rows)
     } catch (err) {
         res.status(500).send(err.message)
