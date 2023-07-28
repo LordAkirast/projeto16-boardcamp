@@ -97,7 +97,7 @@ app.get("/customers/:id", async (req, res) => {
 
     try {
         const cliente = await db.query(`SELECT * FROM customers where id = $1;`, [id])
-        if (cliente.rows[0].length <= 0) {
+        if (cliente.rows.length <= 0) {
             res.status(404).send('ID de cliente não encontrado!')
         } else {
             res.send(cliente.rows[0])
