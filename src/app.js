@@ -160,7 +160,7 @@ app.post("/customers", async (req, res) => {
         if (customer.rows.length > 0) {
             res.status(409).send("Cliente de mesmo cpf já existe!")
         } else {
-            await db.query('INSERT INTO customers(name, phone, cpf, birthday) values ($1, $2, $3, TO_CHAR($4, \'YYYY-MM-DD\'));', [name, phone, cpf, birthday]);
+            await db.query('INSERT INTO customers(name, phone, cpf, birthday) values ($1, $2, $3, $4);', [name, phone, cpf, formatedBirthday]);
             res.status(201).send("Cliente criado!")
         }
     } catch (err) {
