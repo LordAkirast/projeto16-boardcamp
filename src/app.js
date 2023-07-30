@@ -188,14 +188,14 @@ app.put("/customers/:id", async (req, res) => {
     if (validation.error) {
         console.log("erro 1 - customers update")
         const errors = validation.error.details.map((detail) => detail.message)
-        return res.status(422).send(errors);
+        return res.status(400).send(errors);
     }
 
     let phoneValidation = phone.toString();
     let cpfValidation = cpf.toString();
     let birthdayValidation = birthday.toString();
 
-    if (phoneValidation.length < 10 || phoneValidation > 11) {
+    if (phoneValidation.length < 10 || phoneValidation.length > 11) {
         return res.status(400).send(`Erro ao tentar atualizar dados: Phone deve ter 10 ou 11 caracteres. Atualmente ele tem: ${phoneValidation.length}`)
     }
 
@@ -214,10 +214,11 @@ app.put("/customers/:id", async (req, res) => {
     try {
         const customer = await db.query('SELECT * FROM customers WHERE cpf = $1;', [cpf])
         if (customer.rows.length > 0) {
-            res.status(409).send("Cliente de mesmo cpf já existe!")
+            res.status(409).send(`Cliente de mesmo CPF ${cpf} encontrado!`) 
         } else {
             await db.query('UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5;', [name, phone, cpf, birthday, id]);
             res.status(200).send("Cliente alterado!")
+              
         }
     } catch (err) {
         res.status(500).send(err.message)
