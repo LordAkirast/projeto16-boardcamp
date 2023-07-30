@@ -212,13 +212,13 @@ app.put("/customers/:id", async (req, res) => {
     }
 
     try {
-        const customer = await db.query('SELECT * FROM customers WHERE cpf = $1;', [cpf])
+        const customer = await db.query('SELECT * FROM customers WHERE cpf = $1 and id = $2;', [cpf,id])
         if (customer.rows.length > 0) {
-            res.status(409).send(`Cliente de mesmo CPF ${cpf} encontrado!`) 
-        } else {
             await db.query('UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5;', [name, phone, cpf, birthday, id]);
             res.status(200).send("Cliente alterado!")
-              
+            
+        } else {
+            res.status(409).send(`O CPF ${cpf} não pode ser o de outro cliente!`)  
         }
     } catch (err) {
         res.status(500).send(err.message)
