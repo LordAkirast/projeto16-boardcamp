@@ -312,6 +312,7 @@ app.post("/rentals", async (req, res) => {
                 const jogos = await db.query('SELECT rentals.*, games.* FROM rentals JOIN games ON rentals."gameId" = games.id WHERE rentals."gameId" = $1 AND games.id = $2;', [gameId, gameId]);
 
                 if (jogos.rows.length > 0) {
+                    ///se for maior que zero. significa que o jogo ja foi alugado. portanto, vai diminuir stocktotal em 1
                   const jogo = jogos.rows[0];
                   if (jogo.stockTotal === 0) {
                     return res.status(400).send("Erro: Não há jogo em estoque.");
@@ -321,7 +322,22 @@ app.post("/rentals", async (req, res) => {
                     return res.status(201).send("Jogo alugado!")
                   }
                 } else {
-                  return res.status(404).send("Jogo não encontrado.");
+                    ///se cair aqui, preciso verificar primeiro se o jogo existe, se não existir dá erro, caso contrário, segue o fluxo e diminui
+                    ///stocktotal em 1. a ideia é que aqui é se for o primeiro aluguel do jogo
+                   const gameVerify = await db.query('SELECT * from games where id = $1', [gameId])
+                   if (gameVerify.rows <= 0 ) {
+                    return res.status(404).send("Jogo não encontrado.");
+                   }
+                    const jogo = jogos.rows[0];
+                  if (jogo.stockTotal === 0) {
+                    return res.status(400).send("Erro: Não há jogo em estoque.");
+                  } else {
+                    await db.query('INSERT INTO rentals (customerId, gameId. rentDate, daysRented, returnDate, originalPrice, delayFee) values($1, $2, $3, $4, $5, $6, $7)'[customerId, gameId. rentDate, daysRented, returnDate, originalPrice, delayFee])
+                    await db.query('UPDATE games SET "stockTotal" = "stockTotal" - 1 WHERE id = $1', [gameId]);
+                    return res.status(201).send(`Jogo: ${jogo.name} alugado com sucesso! Restam: ${jogo.stockTotal} unidades!`)
+                  }
+                    
+                 
                 }
                 
             } catch (err) {
