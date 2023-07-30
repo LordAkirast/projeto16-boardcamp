@@ -23,9 +23,9 @@ const createCustomer = Joi.object({
 });
 
 const createRent = Joi.object({
-    phone: Joi.string().required(),
-    cpf: Joi.number().required(),
-    birthday: Joi.date().iso().required()
+    customerId: Joi.number().required(),
+    gameId: Joi.number().required(),
+    daysRented: Joi.number().required(),
 });
 
 
