@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 import { db } from "./databases/database.connection.js"
 import Joi from "joi"
-
+import dayjs from "dayjs"
 
 
 
@@ -17,6 +17,12 @@ const createGame = Joi.object({
 });
 
 const createCustomer = Joi.object({
+    phone: Joi.string().required(),
+    cpf: Joi.number().required(),
+    birthday: Joi.date().iso().required()
+});
+
+const createRent = Joi.object({
     phone: Joi.string().required(),
     cpf: Joi.number().required(),
     birthday: Joi.date().iso().required()
@@ -282,33 +288,42 @@ app.post("/rentals", async (req, res) => {
                 gameId: 1,
                 daysRented: 3
             }
+            ///parte de data
+            const dataAtual = dayjs();
+            const rentDate = dataAtual.format('YYYY-MM-DD')
+            ///
+            let returnDate = null
+            let delayFee = null
 
 
-            const validation = createGame.validate({ stockTotal, pricePerDay }, { abortEarly: "False" })
+            const validation = createRent.validate({ customerId, gameId, daysRented }, { abortEarly: "False" })
             if (validation.error) {
-                console.log("erro 1")
+                console.log("erro 1 - rent")
                 const errors = validation.error.details.map((detail) => detail.message)
                 return res.status(422).send(errors);
             }
 
-            if (stockTotal <= 0 || pricePerDay <= 0) {
-                return res.status(400).send("stockTotal e/ou pricePerDay devem ser maiores do que 0.")
+            if (daysRented <= 0) {
+                return res.status(400).send("daysRented deve ser maior do que 0.")
             }
 
-            if (!name) {
-                return res.status(400).send("name precisa ser preenchido!")
-            }
 
             try {
-                const jogos = await db.query('SELECT * FROM games WHERE name = $1;', [name]);
+                const jogos = await db.query('SELECT rentals.*, games.* FROM rentals JOIN games ON rentals."gameId" = games.id WHERE rentals."gameId" = $1 AND games.id = $2;', [gameId, gameId]);
+
                 if (jogos.rows.length > 0) {
-                    res.status(409).send("Jogo de mesmo nome já existe!")
+                  const jogo = jogos.rows[0];
+                  if (jogo.stockTotal === 0) {
+                    return res.status(400).send("Erro: Não há jogo em estoque.");
+                  } else {
+                    await db.query('INSERT INTO rentals (customerId, gameId. rentDate, daysRented, returnDate, originalPrice, delayFee) values($1, $2, $3, $4, $5, $6, $7)'[customerId, gameId. rentDate, daysRented, returnDate, originalPrice, delayFee])
+                    await db.query('UPDATE games SET "stockTotal" = "stockTotal" - 1 WHERE id = $1', [gameId]);
+                    return res.status(201).send("Jogo alugado!")
+                  }
                 } else {
-                    await db.query(
-                        'INSERT INTO games (name, image, "stockTotal", "pricePerDay") VALUES ($1, $2, $3, $4);',
-                        [name, image, stockTotal, pricePerDay]
-                    ); res.status(201).send("Jogo inserido!")
+                  return res.status(404).send("Jogo não encontrado.");
                 }
+                
             } catch (err) {
                 res.status(500).send(err.message)
 
