@@ -212,12 +212,30 @@ app.put("/customers/:id", async (req, res) => {
     }
 
     try {
+        ///busca no banco onde o cpf e id é o mesmo. para alterar valor da mesma pessoa
         const customer = await db.query('SELECT * FROM customers WHERE cpf = $1 and id = $2;', [cpf,id])
+        ///se encontrar, ele altera. 
         if (customer.rows.length > 0) {
+            ///atualiza os dados que não seja cpf
             await db.query('UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5;', [name, phone, cpf, birthday, id]);
             res.status(200).send("Cliente alterado!")
             
         } else {
+            //se não encontrar, faz mais uma busca, para ver se tem alguem com esse cpf no banco
+            try {
+                ///se encontrar, ele não altera e dá erro
+                const customer = await db.query('SELECT * FROM customers WHERE cpf = $1;', [cpf])
+                if (customer.rows.length > 0) {
+                    res.status(409).send(`O CPF ${cpf} não pode ser o de outro cliente!`)  
+                    
+                } else {
+                    ///se não encontrar, ele altera
+                    await db.query('UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5;', [name, phone, cpf, birthday, id]);
+                    res.status(200).send("Cliente alterado!")
+                }
+            } catch (error) {
+                
+            }
             res.status(409).send(`O CPF ${cpf} não pode ser o de outro cliente!`)  
         }
     } catch (err) {
