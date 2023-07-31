@@ -433,9 +433,10 @@ app.post("/rentals/:id/return", async (req, res) => {
         const diffInDays = dateY.diff(dateX, 'day');
 
         console.log(`A diferença entre ${x} e ${y} é de ${diffInDays} dias.`);
+        let delayFee = 0;
         if (diffInDays > aluguel.rows[0].daysRented) {
             diffInDays = diffInDays - aluguel.rows[0].daysRented
-            let delayFee = diffInDays * aluguel.rows[0].pricePerDay
+            delayFee = diffInDays * aluguel.rows[0].pricePerDay
         } else {
             let delayFee = 0;
         }
