@@ -371,8 +371,8 @@ app.post("/rentals", async (req, res) => {
                         return res.status(400).send("Erro: Não há jogo em estoque.");
                     } else {
                         console.log('entrou no segundo else')
-                        
-        
+
+
                         console.log('itens: ' + customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee)
                         await db.query(
                             'INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1, $2, $3, $4, $5, $6, $7)',
@@ -396,6 +396,47 @@ app.post("/rentals", async (req, res) => {
         res.status(500).send(err.message)
 
     }
+
+})
+
+app.post("/rentals/:id/return", async (req, res) => {
+
+    const { id } = req.query
+
+    
+    try {
+        const aluguel = await db.query('SELECT * FROM rentals where id = $1', [id])
+
+        if (aluguel.rows[0].returnDate) {
+            return res.status(400).send('Aluguel já finalizado!')
+        }
+
+        let returnDate = dataAtual.format('YYYY-MM-DD')
+
+        // Converter as datas para objetos dayjs
+        x = aluguel.rows[0].rentDate
+        y = returnDate
+        const dateX = dayjs(x);
+        const dateY = dayjs(y);
+
+        // Calcular a diferença em dias
+        const diffInDays = dateY.diff(dateX, 'day');
+
+        console.log(`A diferença entre ${x} e ${y} é de ${diffInDays} dias.`);
+        let delayFee = diffInDays * aluguel.rows[0].pricePerDay
+
+
+
+        try {
+            await db.query('UPDATE rentals SET returnDate = $1, delayFee = $2 WHERE id = $3', [returnDate, delayFee, id]);
+            return res.status(200).send('Aluguel finalizado!')
+        } catch (err) {
+            res.status(500).send(err.message)
+        }
+    } catch (err) {
+        res.status(404).send(err.message)
+    }
+
 
 })
 
