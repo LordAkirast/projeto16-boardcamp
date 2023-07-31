@@ -401,21 +401,30 @@ app.post("/rentals", async (req, res) => {
 
 app.post("/rentals/:id/return", async (req, res) => {
 
-    const { id } = req.query
+    const { id } = req.params
 
     
     try {
-        const aluguel = await db.query('SELECT * FROM rentals where id = $1', [id])
+        const aluguel = await db.query(
+            'SELECT rentals.*, games."pricePerDay" FROM rentals JOIN games ON rentals."gameId" = games.id WHERE rentals.id = $1;',
+            [id]
+          );
+          
+       
 
         if (aluguel.rows[0].returnDate) {
             return res.status(400).send('Aluguel já finalizado!')
         }
 
+        
+        const dataAtual = dayjs();
         let returnDate = dataAtual.format('YYYY-MM-DD')
 
+        
+
         // Converter as datas para objetos dayjs
-        x = aluguel.rows[0].rentDate
-        y = returnDate
+        let x = aluguel.rows[0].rentDate
+        let y = returnDate
         const dateX = dayjs(x);
         const dateY = dayjs(y);
 
@@ -424,6 +433,12 @@ app.post("/rentals/:id/return", async (req, res) => {
 
         console.log(`A diferença entre ${x} e ${y} é de ${diffInDays} dias.`);
         let delayFee = diffInDays * aluguel.rows[0].pricePerDay
+
+        console.log('aluguel', aluguel.rows[0])
+
+        console.log('diff', diffInDays, 'aluguel', aluguel.rows[0].pricePerDay)
+
+        console.log((delayFee), (diffInDays), (returnDate))
 
 
 
