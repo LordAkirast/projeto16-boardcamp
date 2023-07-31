@@ -428,7 +428,7 @@ app.post("/rentals/:id/return", async (req, res) => {
 
 
         try {
-            await db.query('UPDATE rentals SET returnDate = $1, delayFee = $2 WHERE id = $3', [returnDate, delayFee, id]);
+            await db.query('UPDATE rentals SET "returnDate" = $1, "delayFee" = $2 WHERE id = $3', [returnDate, delayFee, id]);
             return res.status(200).send('Aluguel finalizado!')
         } catch (err) {
             res.status(500).send(err.message)
