@@ -405,7 +405,7 @@ app.post("/rentals/:id/return", async (req, res) => {
 
 
     try {
-        const aluguel = await db.query(
+        let aluguel = await db.query(
             'SELECT rentals.*, games."pricePerDay" FROM rentals JOIN games ON rentals."gameId" = games.id WHERE rentals.id = $1;',
             [id]
         );
@@ -417,7 +417,7 @@ app.post("/rentals/:id/return", async (req, res) => {
         }
 
 
-        const dataAtual = dayjs();
+        let dataAtual = dayjs();
         let returnDate = dataAtual.format('YYYY-MM-DD')
 
 
@@ -425,12 +425,12 @@ app.post("/rentals/:id/return", async (req, res) => {
         // Converter as datas para objetos dayjs
         let x = aluguel.rows[0].rentDate
         let y = returnDate
-        const dateX = dayjs(x).format('YYYY-MM-DD');
-        const dateY = dayjs(y);
+        let dateX = dayjs(x).format('YYYY-MM-DD');
+        let dateY = dayjs(y);
         console.log('x', dateX, 'y', dateY)
 
         // Calcular a diferença em dias
-        const diffInDays = dateY.diff(dateX, 'day');
+        let diffInDays = dateY.diff(dateX, 'day');
 
         console.log(`A diferença entre ${x} e ${y} é de ${diffInDays} dias.`);
         let delayFee = 0;
