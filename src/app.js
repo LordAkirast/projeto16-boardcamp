@@ -464,6 +464,7 @@ app.post("/rentals/:id/return", async (req, res) => {
 })
 
 app.delete("/rentals/:id", async (req,res) => {
+    console.log('entrou no delete')
 
     const { id } = req.params
 
@@ -475,10 +476,24 @@ app.delete("/rentals/:id", async (req,res) => {
             [id]
         );
 
+        console.log('passou do try')
+
 
 
         if (!aluguel.rows[0].returnDate) {
             return res.status(400).send('Aluguel não finalizado!')
+        }
+
+        console.log('passou do returnDate')
+
+        
+        try {
+            await db.query('DELETE from rentals where id = $1;', [id]);
+            res.status(200).send('Aluguel deletado!')
+            
+        } catch (err) {
+            res.status(404).send('erro ao deletar', err.message)
+            
         }
         
     } catch (err) {
