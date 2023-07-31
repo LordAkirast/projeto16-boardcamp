@@ -425,8 +425,9 @@ app.post("/rentals/:id/return", async (req, res) => {
         // Converter as datas para objetos dayjs
         let x = aluguel.rows[0].rentDate
         let y = returnDate
-        const dateX = dayjs(x);
+        const dateX = dayjs(x).format('YYYY-MM-DD');
         const dateY = dayjs(y);
+        console.log('x', dateX, 'y', dateY)
 
         // Calcular a diferença em dias
         const diffInDays = dateY.diff(dateX, 'day');
