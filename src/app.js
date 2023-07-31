@@ -252,16 +252,44 @@ app.put("/customers/:id", async (req, res) => {
 })
 
 app.get("/rentals", async (req, res) => {
-
     try {
-        const alugueis = await db.query(`SELECT * FROM rentals;`)
-        res.send(alugueis.rows)
+        const query = `
+            SELECT rentals.id, rentals."customerId", rentals."gameId", rentals."rentDate", rentals."daysRented", rentals."returnDate", rentals."originalPrice", rentals."delayFee",
+                   customers.id as customer_id, customers.name as customer_name,
+                   games.id as game_id, games.name as game_name
+            FROM rentals
+            JOIN customers ON rentals."customerId" = customers.id
+            JOIN games ON rentals."gameId" = games.id;
+        `;
+
+        const alugueis = await db.query(query);
+        const formattedRentals = alugueis.rows.map((aluguel) => {
+            return {
+                id: aluguel.id,
+                customerId: aluguel.customerId,
+                gameId: aluguel.gameId,
+                rentDate: aluguel.rentDate,
+                daysRented: aluguel.daysRented,
+                returnDate: aluguel.returnDate,
+                originalPrice: aluguel.originalPrice,
+                delayFee: aluguel.delayFee,
+                customer: {
+                    id: aluguel.customer_id,
+                    name: aluguel.customer_name
+                },
+                game: {
+                    id: aluguel.game_id,
+                    name: aluguel.game_name
+                }
+            };
+        });
+
+        res.send(formattedRentals);
     } catch (err) {
-        res.status(500).send(err.message)
-
+        res.status(500).send(err.message);
     }
+});
 
-})
 
 app.post("/rentals", async (req, res) => {
 
