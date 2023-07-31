@@ -316,7 +316,7 @@ app.post("/rentals", async (req, res) => {
                     const jogo = jogos.rows[0];
                     console.log('fase 2')
                     console.log(jogo.stockTotal)
-                    if (jogo.stockTotal === 0) {
+                    if (jogo.stockTotal === 1) {
                         console.log('fase 3')
                         return res.status(400).send("Erro: Não há jogo em estoque.");
                     } else {
