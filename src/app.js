@@ -463,5 +463,31 @@ app.post("/rentals/:id/return", async (req, res) => {
 
 })
 
+app.delete("/rentals/:id", async (req,res) => {
+
+    const { id } = req.params
+
+
+    try {
+
+        let aluguel = await db.query(
+            'SELECT * from rentals where id = $1;',
+            [id]
+        );
+
+
+
+        if (!aluguel.rows[0].returnDate) {
+            return res.status(400).send('Aluguel não finalizado!')
+        }
+        
+    } catch (err) {
+
+        res.status(404).send(err.message)
+
+        
+    }
+
+})
 
 app.listen(5000, () => console.log("Servidor ligado!"))
